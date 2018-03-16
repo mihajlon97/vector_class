@@ -19,7 +19,7 @@ bool operator!=(const Vektor& lop, const Vektor& rop){
 }
 
 bool operator>(const Vektor& lop, const Vektor& rop){
-    size_t i = 0;	
+    size_t i = 0;
     while (i < lop.sz && i<rop.sz && lop.values[i] == rop.values[i]) ++i;
 	return (i >= rop.sz && lop.sz>rop.sz) || (i <= rop.sz && i < lop.sz && lop.values[i] > rop.values[i]);
 }
@@ -41,6 +41,7 @@ bool operator<(const Vektor& lop, const Vektor& rop){
 		return true;
     return false;
 }
+
 
 Vektor operator+(const Vektor& lop, const Vektor& rop){
     Vektor sum(lop.sz + rop.sz);
@@ -78,14 +79,14 @@ int main(){
   cout << endl << endl;
   Vektor v6{v2};
   v6.print(cout);
-  
+
   cout << endl << endl;
   initializer_list<double> liste = {1,2,3,4,5,6};
-  
+
   Vektor v7{liste};
   v7.print(cout);
-  
-  
+
+
 
   return 0;
 }

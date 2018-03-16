@@ -15,15 +15,58 @@ Vector::ConstIterator::ConstIterator(Vector::pointer p){
 	this->ptr = p;
 }
 
+Vector::ConstIterator& Vector::ConstIterator::operator++(){
+	this->ptr++;
+}
+
+bool Vector::ConstIterator::operator!=(const ConstIterator& it){
+	return (*ptr!=*it.ptr);
+}
+
+bool Vector::ConstIterator::operator==(const ConstIterator& it){
+	return (*this!=it);
+}
+
+Vector::ConstIterator::reference Vector::ConstIterator::operator*(){
+	return *ptr;
+}
+
+Vector::ConstIterator::const_reference Vector::ConstIterator::operator*() const{
+	return *ptr;
+}
+
+
+
 
 
 // ------- Vector Iterator Methoden ---------
-
+Vector::Iterator::Iterator(){
+	this->ptr = 0;
+}
 
 Vector::Iterator::Iterator(Vector::pointer p){
 	this->ptr = p;
 }
 
+Vector::Iterator& Vector::Iterator::operator++(){
+	++this->ptr;
+}
+
+bool Vector::Iterator::operator!=(const Iterator& it){
+	return (*ptr!=*it.ptr);
+}
+
+bool Vector::Iterator::operator==(const Iterator& it){
+	return (*this!=it);
+}
+
+Vector::Iterator::reference Vector::Iterator::operator*(){
+	return *ptr;
+}
+
+Vector::Iterator::const_reference Vector::Iterator::operator*() const{
+	return *ptr;
+}
 
 
 
@@ -47,10 +90,10 @@ Vector::Vector(initializer_list<value_type> liste):Vector(){
 }
 
 Vector& Vector::operator=(Vector& neu){
-    swap(sz, neu.sz);
-    swap(max_sz, neu.max_sz);
-    swap(values, neu.values);
-    return *this;
+  swap(sz, neu.sz);
+  swap(max_sz, neu.max_sz);
+  swap(values, neu.values);
+  return *this;
 }
 
 Vector::~Vector(){
@@ -82,16 +125,16 @@ bool Vector::empty() const{
 
 void Vector::pop_back(){
   if (empty())
-	throw runtime_error("Vector ist leer");
+		throw runtime_error("Vector ist leer");
   sz--;
   shrink_to_fit();
 }
 
 void Vector::push_back(value_type n){
   if (max_sz == sz)
-	change_size(2*max_sz);
+		change_size(2*max_sz);
   values[sz] = n;
-  sz++;	
+  sz++;
 }
 
 void Vector::shrink_to_fit(){
@@ -105,13 +148,13 @@ void Vector::reserve(size_type newsize){
 
 double& Vector::operator[](size_type val){
   if (val < 0 || val >= sz)
-	throw runtime_error("Index ist ungueltig");
+		throw runtime_error("Index ist ungueltig");
   return values[val];
 }
 
 const double& Vector::operator[](size_type val) const{
   if (val <= 0 && val >= sz)
-	throw runtime_error("Index ist ungueltig");
+		throw runtime_error("Index ist ungueltig");
   return values[val];
 }
 
@@ -123,23 +166,41 @@ void Vector::clear(){
 ostream& Vector::print(std::ostream &os) const{
   os << "[";
   for (size_type i = 0; i < sz; i++){
-	os << values[i];
-	if (i != sz - 1){
-	  os << ", ";
-	}
-	else{
-	  os << "]";
-	  break;
-	}
+		os << values[i];
+		if (i != sz - 1){
+	  	os << ", ";
+		}else{
+	  	os << "]";
+	  	break;
+		}
   }
-  return os;	
+  return os;
+}
+
+ostream& Vector::printKontra(std::ostream &os) const{
+	os << "Begin: " << *begin() <<endl;
+	os << "End: " << *end() << endl;
+	os << "Size: " << sz << endl;
+	os << "[";
+
+	for(Vector::const_reference elem : *this){
+		os << elem;
+		//print [1,2,3, statt [1,2,3]
+		if (elem != end()){
+	  	os << ", ";
+		}else{
+	  	os << "]";
+	  	break;
+		}
+	}
+  return os;
 }
 
 istream& Vector::read(istream &is){
-  char c; 
+  char c;
   is >> c;
-  if (c != '[')
-	throw runtime_error ("[ expected");
+  if (c != '[') throw runtime_error ("[ expected");
+
   clear();
   is >> c;
   if (c != ']')
@@ -185,6 +246,44 @@ Vector::value_type Vector::max(){
   return max;
 }
 
+//Operator funktioniert nicht
+
+//Vector::const_iterator Vector::operator ConstIterator(){
+//	return Vector::const_iterator();
+//}
+
+
+Vector::iterator Vector::insert(Vector::const_iterator pos, Vector::const_reference val) {
+/*
+	auto diff = pos-begin();
+	if(diff<0 || static_cast<size_type>(diff)>sz)
+		throw runtime_error("Iterator out of bounds");
+	size_type current{static_cast<size_type>(diff)};
+	if(sz>=max_sz)
+		reserve(max_sz*2); //max_sz*2+10, wenn Ihr Container max_sz==0 erlaubt
+	for(size_t i {sz}; i-->current;)
+		values[i+1]=values[i];
+	values[current]=val;
+	++sz;
+	return Vector::iterator{values+current};
+	*/
+}
+
+Vector::iterator Vector::erase(Vector::const_iterator pos) {
+/*
+	auto diff = pos-begin();
+	if(diff<0 || static_cast<size_type>(diff)>sz)
+		throw runtime_error("Iterator out of bounds");
+	size_type current{static_cast<size_type>(diff)};
+
+	for(size_t i {current}; i<sz-1; ++i)
+		values[i]=values[i+1];
+	--sz;
+	return Vector::iterator{values+current};
+	*/
+}
+
+/*
 void Vector::insert (size_type pos, value_type wert){
   if (pos < 0 || pos >= sz)
 	throw runtime_error("Index ist ungueltig");
@@ -208,7 +307,7 @@ void Vector::erase(size_type pos){
   sz--;
   shrink_to_fit();
 }
-
+*/
 ostream& operator<<(ostream& os, const Vector& v){
   return v.print(os);
 }

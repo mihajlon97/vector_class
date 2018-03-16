@@ -2,6 +2,12 @@
 #include"vector.h"
 using namespace std;
 
+/*
+Vector::difference_type Vector::operator-(const Vector::ConstIterator& lop, const Vector::ConstIterator& rop){
+	return lop.ptr - rop.ptr;
+}
+*/
+
 int main(){
 	Vector a = Vector();
 	try{
@@ -31,7 +37,7 @@ int main(){
 
 	cout << "Pop back and [] \n";
 	Vector d = Vector{5,6,7,8};
-	d.pop_back();	
+	d.pop_back();
 	try{
 		cout << d[3] << '\n';
 	}
@@ -59,7 +65,3 @@ Ausgabe:
 	Pop back and []
 	woups2
 */
-
-
-
-
