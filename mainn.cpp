@@ -2,11 +2,16 @@
 #include"vector.h"
 using namespace std;
 
-/*
-Vector::difference_type Vector::operator-(const Vector::ConstIterator& lop, const Vector::ConstIterator& rop){
+
+Vector::difference_type operator-(const Vector::ConstIterator& lop, const Vector::ConstIterator& rop){
 	return lop.ptr - rop.ptr;
 }
-*/
+
+bool operator<(const Vector::ConstIterator& lop, const Vector::ConstIterator& rop){
+	return lop.ptr<rop.ptr;
+}
+bool myfn(Vector::const_reference l, Vector::const_reference r){return l<r;}
+
 
 int main(){
 	Vector a = Vector();
@@ -44,6 +49,32 @@ int main(){
 	catch(exception e){
 		cout << "woups2" << '\n';
 	}
+	d.print(cout);
+	cout << endl << "---------Test Erase-------" << endl;
+	cout << "Erase pos: 1"<< endl;
+	d.erase(d.getIteratorOnPos(1));
+	d.print(cout);
+
+	cout << endl << "---------Test Insert-------" << endl;
+	cout << "Insert:8 - pos: 1"<< endl;
+	d.insert(d.getIteratorOnPos(1),8);
+	d.print(cout);
+
+	cout << endl << "---------Test Algorithms-------" << endl;
+	Vector algo{7, 1.4, 8.2, 9, -4.5, -0.5};
+	algo.print(cout);
+	cout << endl;
+	cout << "Sum: " << algo.sum() << endl;
+	auto be=d.begin();
+	auto en=d.end();
+	cout << "Begin: " << *be << endl;
+	cout << "End: " << *en << endl;
+
+	auto it = max_element(be,en, [] (Vector::const_reference l, Vector::const_reference r){return l>r;});
+	cout << "Max: " << *it << endl;
+	cout << "Max: " << d.max() << endl;
+	cout << "Min: " << d.min() << endl;
+
 
 	return 0;
 }

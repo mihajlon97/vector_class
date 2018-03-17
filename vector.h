@@ -1,5 +1,6 @@
 #include <iostream>
 #include <initializer_list>
+#include <algorithm>
 
 using namespace std;
 
@@ -36,17 +37,23 @@ class Vector{
   		  using pointer = Vector::pointer;
   		  //using iterator_category = Vector::forward_iterator_tag;
   	  private:
-  	  	pointer ptr;
+  	  	const_pointer ptr;
   	  public:
-  	  	ConstIterator();
-  	  	ConstIterator(pointer);
+  	  	ConstIterator(){this->ptr=0;}
+  	  	ConstIterator(pointer p){this->ptr=p;}
 
-        ConstIterator& operator++();
-		    bool operator!=(const ConstIterator&);
-        bool operator==(const ConstIterator&);
-		    reference operator*();
-		    const_reference operator*() const;
-  	};
+        ConstIterator& operator++(){this->ptr++;}
+        ConstIterator& operator--(){this->ptr--;}
+		    bool operator!=(const ConstIterator& it){return (*ptr!=*it.ptr);}
+        bool operator==(const ConstIterator& it){return (*this!=it);}
+        bool operator<(const ConstIterator& it){cout<<"tebraaa";return (*ptr<*it.ptr);}
+		    const_reference operator*() const{return *ptr;}
+        friend bool operator<(const ConstIterator& lop, const ConstIterator& rop);
+
+        //bool operator<(const_reference rop)const{return (*ptr<rop);}
+
+        friend difference_type operator-(const const_iterator& lop, const const_iterator& rop);
+    };
 
 
   	class Iterator{
@@ -61,70 +68,249 @@ class Vector{
         pointer ptr;
 
 	    public:
-	  	  Iterator();
-		    Iterator(pointer);
-		    Iterator& operator++();
-		    bool operator!=(const Iterator&);
-        bool operator==(const Iterator&);
+	  	  Iterator(){this->ptr=0;}
+		    Iterator(pointer p){this->ptr=p;}
+		    Iterator& operator++(){this->ptr++;}
+        Iterator& operator--(){this->ptr--;}
+		    bool operator!=(const Iterator& it){return (*ptr!=*it.ptr);}
+        bool operator==(const Iterator& it){return (*this!=it);}
+        //bool operator<(const Iterator& it){return (*ptr>*it.ptr);}
+        //bool operator<(const_reference it){return (*ptr<it);}
 
-        //Difference in implementation??
-		    reference operator*();
-		    const_reference operator*() const;
+		    reference operator*(){return *ptr;}
+
+        friend difference_type operator-(const const_iterator& lop, const const_iterator& rop);
+
+        friend bool operator<(const ConstIterator& lop, const ConstIterator& rop);
+
+        operator ConstIterator(){
+          return ConstIterator(ptr);
+        }
+
 	   };
-
 
 	  static constexpr size_type min_sz{2};
 
     Vector():Vector(min_sz){};
-    Vector(const Vector& neu);
-    Vector(initializer_list<value_type>);
-    Vector& operator=(Vector&);
-    Vector(size_type);
-    ~Vector();
+    Vector(const Vector& v):Vector(){
+      for (size_type i{0}; i < v.sz; i++)
+        push_back(v.values[i]);
+    }
 
-    value_type getvalue(size_type) const;
-    value_type sum();
-    value_type min();
-    value_type max();
+    Vector(initializer_list<value_type> l):Vector(){
+      for (const auto& e : l)
+        push_back(e);
+    }
 
-    size_type size() const;
+    Vector& operator=(Vector& v){
+      swap(sz, v.sz);
+      swap(max_sz, v.max_sz);
+      swap(values, v.values);
+      return *this;
+    }
 
-    bool empty() const;
+    Vector(size_type max){
+      sz = 0;
+      max_sz = (max > min_sz) ? max : min_sz;
+      values = new value_type[max_sz];
+    }
 
-    void pop_back();
-    void shrink_to_fit();
-    void push_back(value_type);
-    void reserve(size_type);
-	  void change_size(size_type);
+    ~Vector(){
+      delete[] values;
+    }
 
-    //const_iterator operator ConstIterator();
-    iterator insert (const_iterator, const_reference);
-    iterator erase (const_iterator);
+    value_type getvalue(size_type i)const{return this->values[i];}
 
-    //void insert (size_type, value_type);
-    //void erase (size_type);
-    void clear();
 
-    ostream& printKontra(ostream &) const;
-    ostream& print(ostream &) const;
-    istream& read(istream &);
+    value_type sum(){
+      if (empty())
+    	 throw runtime_error("Vector ist leer");
+      value_type sum = 0;
+      for (size_type i = 0; i < sz; i++)
+      	sum += values[i];
+      return sum;
+    }
+
+    value_type min(){
+      if (empty())
+    	throw runtime_error("Vector ist leer");
+      value_type min = values[0];
+      for (size_type i = 1; i < sz; i++)
+      	if (min > values[i])
+    	  min = values[i];
+      return min;
+    }
+
+
+    value_type max() const{
+      //if (empty())
+    	//  throw runtime_error("Vector ist leer");
+      //value_type max = values[0];
+      //for (size_type i = 1; i < sz; i++)
+      //	if (max < values[i])
+    	//  max = values[i];
+      //return max;
+
+      //, [] (const_reference l, const_reference r){return l==r;}
+
+      auto it = max_element(begin(), end());
+      return *it;
+    }
+
+    size_type size() const{return sz;}
+
+
+    bool empty() const{
+      if(sz==0)
+        return true;
+      return false;
+    }
+
+    void pop_back(){
+      if (empty())
+    		throw runtime_error("Vector ist leer");
+      sz--;
+      shrink_to_fit();
+    }
+
+    void shrink_to_fit(){
+      if (max_sz > sz) return;
+      change_size(sz < min_sz ? min_sz : sz);
+    }
+
+    void push_back(value_type n){
+      if (max_sz == sz)
+    		change_size(2*max_sz);
+      values[sz] = n;
+      sz++;
+    }
+
+    void reserve(size_type newsize){change_size(newsize);}
+
+	  void change_size(size_type newsize){
+    	double *buf = new value_type [newsize];
+    	for (size_type i = 0; i < sz; i++)
+    		buf[i] = values[i];
+    	delete[] values;
+    	values = buf;
+    	max_sz = newsize;
+    }
+
+    iterator insert (const_iterator pos, const_reference val){
+    	auto diff = pos-begin();
+    	if(diff<0 || static_cast<size_type>(diff)>sz)
+    		throw runtime_error("Iterator out of bounds");
+    	size_type current{static_cast<size_type>(diff)};
+    	if(sz>=max_sz)
+    		reserve(max_sz*2);
+    	for(size_t i{sz}; i-- > current;)
+    		values[i+1]=values[i];
+    	values[current]=val;
+    	++sz;
+    	return Vector::iterator{values+current};
+    }
+
+    iterator erase (const_iterator pos){
+    	auto diff = pos-begin();
+    	if(diff<0 || static_cast<size_type>(diff)>sz)
+    		throw runtime_error("Iterator out of bounds");
+    	size_type current{static_cast<size_type>(diff)};
+
+    	for(size_t i{current}; i<sz-1; ++i)
+    		values[i]=values[i+1];
+    	--sz;
+    	return Vector::iterator{values+current};
+    }
+
+    void clear(){
+      sz = 0;
+      shrink_to_fit();
+    }
+
+    ostream& printKontra(std::ostream &os) const{
+    	os << "Begin: " << *begin() <<endl;
+    	os << "End: " << *end() << endl;
+    	os << "Size: " << sz << endl;
+
+    	cout << '[';
+
+    	bool first{true};
+    	for(const auto& elem : *this){
+    	//for(auto it=begin();it!=end();--it){
+        if(first)
+          first = false;
+        else
+          os << ", ";
+        os << elem;
+    	}
+    	os << ']';
+      return os;
+    }
 
     //Operatoren
-    reference operator[](size_type);
-    const_reference operator[](size_type) const;
+    reference operator[](size_type val){
+      if (val < 0 || val >= sz)
+    		throw runtime_error("Index ist ungueltig");
+      return values[val];
+    }
+
+    const_reference operator[](size_type val) const{
+      if (val <= 0 && val >= sz)
+    		throw runtime_error("Index ist ungueltig");
+      return values[val];
+    }
 
     iterator begin() {return Iterator{values};}
 	  iterator end() {return Iterator{values+sz};}
 	  const_iterator begin() const{return ConstIterator{values};}
 	  const_iterator end() const{return ConstIterator{values+sz};}
 
-    //friend difference_type operator-(const const_iterator& lop, const const_iterator& rop);
+    iterator getIteratorOnPos(size_type i){return Iterator{&values[i]};};
+    const_iterator getIteratorOnPos(size_type i)const{return ConstIterator{&values[i]};};
+
+
 
     friend bool operator==(const Vector& lop, const Vector& rop);
     friend bool operator>(const Vector& lop, const Vector& rop);
-    friend ostream& operator<<(ostream&, const Vector&);
-    friend istream& operator>>(istream&, const Vector&);
     friend Vector& operator+(istream&, const Vector&);
     friend Vector operator+(const Vector& lop, const Vector& rop);
 
+
+    ostream& operator<<(ostream& os){
+      print(os);
+    }
+
+    ostream& print(ostream& os){
+      os << "[";
+      for (size_type i = 0; i < sz; i++){
+    		os << values[i];
+    		if (i != sz - 1){
+    	  	os << ", ";
+    		}else{
+    	  	os << "]";
+    	  	break;
+    		}
+      }
+      return os;
+    }
+    istream& operator>>(istream& is){
+      char c;
+      is >> c;
+      if (c != '[') throw runtime_error ("[ expected");
+
+      clear();
+      is >> c;
+      if (c != ']')
+        return is;
+      is.putback(c);
+      do {
+        value_type d;
+        is >> d;
+        push_back(d);
+        is >> c;
+        if (c != ',' && c != ']') throw runtime_error (", or ] expected");
+      }while (c != ']');
+
+      return is;
+    }
 };
