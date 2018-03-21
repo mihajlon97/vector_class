@@ -3,18 +3,18 @@
 using namespace std;
 
 
-Vector::difference_type operator-(const Vector::ConstIterator& lop, const Vector::ConstIterator& rop){
+Vector<?>::difference_type operator-(const Vector::ConstIterator& lop, const Vector::ConstIterator& rop){
 	return lop.ptr - rop.ptr;
 }
 
-bool operator<(const Vector::ConstIterator& lop, const Vector::ConstIterator& rop){
+bool operator<(const Vector<?>::ConstIterator& lop, const Vector::ConstIterator& rop){
 	return lop.ptr<rop.ptr;
 }
 bool myfn(Vector::const_reference l, Vector::const_reference r){return l<r;}
 
 
 int main(){
-	Vector a = Vector();
+	Vector<?> a = Vector();
 	try{
 		cout << a[0] << '\n';
 	}
@@ -23,9 +23,9 @@ int main(){
 	}
 	a.push_back(12);
 	cout << a[0] << '\n';
-	Vector b = Vector(a);
+	Vector<?> b = Vector(a);
 	cout << b[0] << '\n';
-	Vector c = Vector{1,3,4};
+	Vector<?> c = Vector{1,3,4};
 	cout << c[2] << '\n';
 	c = b;
 	cout << c[0] << '\n';
